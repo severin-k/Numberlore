@@ -17,6 +17,7 @@ export default function Home() {
     }[] | null
   >(null);
   const [loading, setLoading] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value);
@@ -25,6 +26,7 @@ export default function Home() {
     } else {
       setNumber(null);
       setMeanings(null); // Clear previous meanings if input is invalid
+      setHasSearched(false);
     }
   };
 
@@ -36,6 +38,7 @@ export default function Home() {
 
     setLoading(true);
     setMeanings(null); // Clear previous meanings while loading
+    setHasSearched(true);
 
     try {
       const result = await getNumberMeanings({number: number});
@@ -45,6 +48,12 @@ export default function Home() {
       alert('Failed to fetch meanings. Please try again.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      fetchMeanings();
     }
   };
 
@@ -58,6 +67,7 @@ export default function Home() {
           placeholder="Enter a number"
           className="w-full md:w-64 bg-input text-foreground"
           onChange={handleInputChange}
+          onKeyDown={handleInputKeyDown}
         />
         <Button
           className="bg-primary text-primary-foreground hover:bg-primary/80"
@@ -95,7 +105,7 @@ export default function Home() {
           ))}
         </div>
       ) : (
-        !loading && number !== null && (
+        !loading && number !== null && hasSearched && (
           <p className="text-lg text-muted-foreground">No meanings found for this number.</p>
         )
       )}
